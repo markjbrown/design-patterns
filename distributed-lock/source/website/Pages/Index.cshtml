@@ -1,0 +1,55 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div>
+    <h1 class="display-4">Global Lock Demo</h1>
+    <p>This demo showcases how to implement Global Locks using Cosmos DB.</p>
+    <h2>Current Locks</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>LockName</th>
+                <th>OwnerId</th>
+                <th>Token</th>
+                <th>TTL</th>
+                <th>Ts</th>
+                <th>ETag</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var gLock in Model.Locks)
+            {
+                <tr>
+                    <td>@gLock.LockName</td>
+                    <td>@gLock.OwnerId</td>                    
+                    <td>@gLock.FenceToken</td>
+                    <td>@gLock.Ts</td>
+                    <td>@gLock.ETag</td>                    
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h2>Current Leases</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>OwnerId</th>
+                <th>TTL</th>
+                <th>Ts</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var gLock in Model.Leases)
+            {
+                <tr>
+                    <td>@gLock.OwnerId</td>
+                    <td>@gLock.LeaseDuration</td>
+                    <td>@gLock.Ts</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
