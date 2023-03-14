@@ -1,0 +1,50 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div>
+    <h1 class="display-4">Distributed Counter Demo</h1>
+    <p>This demo showcases how to implement Distributed Counters using Cosmos DB.</p>
+    <section>
+        <form method="post" class="form-horizontal">
+            @Html.AntiForgeryToken()
+            <fieldset>
+            <legend>Create New Counter</legend>
+            <label for="Name">Counter Name:</label>
+            <input name="Name" type="text">
+            <label for="Paritions">Paritions:</label>
+            <input name="Paritions" type="text">
+            <input type="submit" />
+            </fieldset>
+        </form>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        { 
+            <div class="alert alert-danger">
+                <p>@Model.ErrorMessage</p>
+        </div>
+        }
+    </section>
+    <h2>Current Counters</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Counter Name</th>
+                <th>Count</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var distCounter in Model.Counters)
+            {
+                <tr>
+                    <td>@distCounter.Name</td>
+                    <td>@distCounter.Count</td>
+                    <td>
+                        <a href="/Counter?Name=@Html.Raw(@distCounter.Name)">Reset</a>&nbsp;&nbsp;
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
