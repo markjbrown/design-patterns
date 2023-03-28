@@ -3,9 +3,8 @@
     "Cosomos_Patterns": {
       "commandName": "Project",
       "environmentVariables": {
-        
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }
 }
-
