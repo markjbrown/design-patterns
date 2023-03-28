@@ -2,6 +2,8 @@
 using System.Net;
 using Microsoft.Extensions.Configuration;
 using Cosmos_Patterns_GlobalLock;
+using System.ComponentModel;
+using Microsoft.Azure.Cosmos.Linq;
 
 namespace CosmosDistributedLock.Services
 {
@@ -10,17 +12,22 @@ namespace CosmosDistributedLock.Services
     {
         private readonly CosmosClient client;
         private readonly Database db;
-        private readonly Container container;
+        private readonly Microsoft.Azure.Cosmos.Container container;
 
 
         public CosmosService(IConfiguration configuration)
         {
-            string databaseName = "LockDB";
-            string containerName = "Locks";
-            
+
+            string uri = configuration["CosmosUri"];
+            string key = configuration["CosmosKey"];
+
+            string databaseName = configuration["CosmosDatabase"];
+            string containerName = configuration["CosmosContainer"];
+
+
             client = new(
-                accountEndpoint: Environment.GetEnvironmentVariable("COSMOS_ENDPOINT")!,
-                authKeyOrResourceToken: Environment.GetEnvironmentVariable("COSMOS_KEY")!);
+                accountEndpoint: uri,
+                authKeyOrResourceToken: key);
 
             db = client.GetDatabase(databaseName);
 
@@ -109,30 +116,36 @@ namespace CosmosDistributedLock.Services
 
         }
 
-        public async Task<long> UpdateLockAsync(DistributedLock distributedLock)
+        public async Task<DistributedLock> UpdateLockAsync(DistributedLock distributedLock)
         {
-            long newFenceToken = -1;
             DistributedLock updatedLock;
 
             try
             {
                 // Take the lock
-                updatedLock = await container.ReplaceItemAsync<DistributedLock>(
-                    item: distributedLock,
-                    id: distributedLock.LockName,
-                    partitionKey: new PartitionKey(distributedLock.LockName),
-                    requestOptions: new ItemRequestOptions { IfMatchEtag = distributedLock.ETag }
-                );
+                //updatedLock = await container.ReplaceItemAsync<DistributedLock>(
+                //    item: distributedLock,
+                //    id: distributedLock.LockName,
+                //    partitionKey: new PartitionKey(distributedLock.LockName),
+                //    requestOptions: new ItemRequestOptions { IfMatchEtag = distributedLock.ETag }
+                //);
+                List<PatchOperation> operations = new()
+                {
+                    PatchOperation.Set($"/OwnerId", distributedLock.OwnerId),
+                    PatchOperation.Increment($"/FenceToken",1)
+                };
 
-                newFenceToken = updatedLock.FenceToken;
-                return newFenceToken;
+                updatedLock = await container.PatchItemAsync<DistributedLock>(distributedLock.LockName, new PartitionKey(distributedLock.LockName), patchOperations: operations, requestOptions: new PatchItemRequestOptions { IfMatchEtag = distributedLock.ETag});
+
+                return updatedLock;
             }
             catch (CosmosException e)
             {
                 if (e.StatusCode == HttpStatusCode.PreconditionFailed)
                 {
-                    //Someone aleady got the lock. Swallow exception, return -1 
-                    newFenceToken = -1;
+                    //Someone aleady got the lock. Swallow exception
+                    return await ReadLockAsync(distributedLock.LockName);
+
                 }
                 else
                 {   //some other error 
@@ -140,7 +153,7 @@ namespace CosmosDistributedLock.Services
                 }
             }
 
-            return newFenceToken;
+            return null;
 
         }
 
