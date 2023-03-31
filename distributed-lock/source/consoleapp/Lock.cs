@@ -45,7 +45,8 @@ namespace Cosmos_Patterns_GlobalLock
         
         string lockName;
         public string ownerId;
-        
+        public string Name;
+
         /// <summary>
         /// This creates a container that has the TTL feature enabled.
         /// </summary>
@@ -54,13 +55,16 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainerName"></param>
         /// <param name="lockName"></param>
         /// <param name="refreshIntervalS"></param>
-        public Lock(DistributedLockService dls, string lockName)
+        public Lock( DistributedLockService dls, string lockName, string threadName)
         {
             this.dls = dls;
             
             this.lockName = lockName;
             
             this.ownerId = Guid.NewGuid().ToString();
+
+            this.Name = threadName;
+
         }
 
         /// <summary>
@@ -71,9 +75,9 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainer"></param>
         /// <param name="lockName"></param>
         /// <returns></returns>
-        static public async Task<Lock> CreateLock(DistributedLockService dls, string lockName)
+        static public async Task<Lock> CreateLock(DistributedLockService dls, string lockName, string threadName)
         {
-            return new Lock(dls, lockName);
+            return new Lock( dls, lockName, threadName);
         }
 
         /// <summary>
@@ -81,13 +85,12 @@ namespace Cosmos_Patterns_GlobalLock
         /// </summary>
         /// <param name="leaseDurationS"></param>
         /// <returns></returns>
-        public async Task<long> AcquireLease(int leaseDurationS)
+        public async Task<LeaseRequestStatus> AcquireLease(int leaseDuration, long existingFenceToken)
         {
             try
             {
-                Console.WriteLine($"{DateTime.Now}]: {ownerId} Attempting to aquire lease for {lockName}");
-
-                return await dls.AcquireLease(lockName, ownerId, leaseDurationS);
+              
+                return await dls.AcquireLease(lockName, ownerId, leaseDuration,existingFenceToken);
             }
             catch (Exception e)
             {
@@ -98,9 +101,7 @@ namespace Cosmos_Patterns_GlobalLock
         public async Task<bool> ReleaseLease(long token)
         {
             try
-            {
-                Console.WriteLine($"{DateTime.Now}]: {ownerId} is releasing the {lockName} lock.");
-
+            {               
                 await dls.ReleaseLease(ownerId);
 
                 return true;

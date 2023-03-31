@@ -1,8 +1,17 @@
 ﻿using CosmosDistributedLock.Services;
 using Microsoft.Azure.Cosmos;
+using System.Collections;
+using System.Threading;
 
 namespace Cosmos_Patterns_GlobalLock
 {
+    public record ConsoleMessage(
+        string Message,
+        ConsoleColor Color
+    );
+    // Delegate that defines the signature for the callback method.
+    public delegate void PostMessageCallback(ConsoleMessage msg);
+
     public class LockTest
     {
         public DistributedLockService dls;
@@ -10,72 +19,86 @@ namespace Cosmos_Patterns_GlobalLock
         private readonly string lockName;
 
         private int lockDuration;
-        
-        private long globalToken;
-        
+               
         public volatile bool isActive = true;
 
-        public LockTest(DistributedLockService dls, string lockName, int lockDuration)
+        private ConsoleColor color;
+
+        string threadName;
+
+        PostMessageCallback postMessage;
+
+        public LockTest(DistributedLockService dls, string lockName, int lockDuration, string threadName, PostMessageCallback postMessage , ConsoleColor color)
         {
             this.dls = dls;
             this.lockName = lockName;
             this.lockDuration = lockDuration;
+            this.threadName = threadName;
+            this.color = color;
+            this.postMessage = postMessage;
         }
 
-        public async Task StartThread()
+
+        public async void StartThread()
         {
-            var mutex = await Lock.CreateLock(dls, lockName);
+            int prevFenceToken=0;
+
+            var mutex = await Lock.CreateLock(dls, lockName, threadName);
+            
+            postMessage(new ConsoleMessage( $"{mutex.Name}: Says Hello", this.color));
 
             while (this.isActive)
             {
-                var seenToken = this.globalToken;
 
-                var localToken = await mutex.AcquireLease(lockDuration);
+                var reqStatus=await mutex.AcquireLease(lockDuration, prevFenceToken);
+                var latestFenceToken = reqStatus.fenceToken;
+                var newOwner = reqStatus.currentOwner;
 
-                Console.WriteLine($"{DateTime.Now}]: {mutex.ownerId}: sees lock token : {localToken}");
+                postMessage(new  ConsoleMessage($"{mutex.Name}: Sees lock [{lockName}] having token {latestFenceToken}, attempting to aquire lease.",this.color));
 
-                if (localToken <= seenToken)
+                if (latestFenceToken <= prevFenceToken)
                 {
-                    throw new Exception($"[{DateTime.Now}]: {mutex.ownerId} : Violation: {localToken} was acquired after {seenToken} was seen");
+                    new Exception($"[{DateTime.Now}]: {mutex.Name} : Violation: {latestFenceToken} was acquired after {prevFenceToken} was seen");                    
                 }
 
-                this.globalToken = localToken;
 
-                while (true)
-                {
-                    seenToken = this.globalToken;
+                if (latestFenceToken> 0 && newOwner == mutex.ownerId)
+                {                        
+                    postMessage(new ConsoleMessage($"{mutex.Name}: Attempt to aquire lease on lock [{lockName}] using token {latestFenceToken}  ==> SUCESS", this.color));
 
-                    if (seenToken > localToken)
+                    //DO WORK...
+                    await DoWork(mutex.Name, lockName);
+
+                    // checking if lease valid when work is completed
+                    if (!await mutex.HasLease(latestFenceToken))
                     {
-                        Console.WriteLine($"{DateTime.Now}]: {mutex.ownerId}: expect to lose {localToken} lease because {seenToken} was seen");
-                    }
-
-                    if (await mutex.HasLease(localToken))
-                    {
-                        if (seenToken > localToken)
-                        {
-                            throw new Exception($"{DateTime.Now}]: Violation: lease to {localToken} was confirmed after {seenToken} was seen");
-                        }
-
-                        Console.WriteLine($"{DateTime.Now}]: {mutex.ownerId}: has valid lock on token = {localToken}");
-
-                        //DO WORK...
-
-                        //wait some random time
-                        Random r = new Random();
-                        
-                        await Task.Delay(r.Next(500, 1000));
-
-                        //release the lease as a good lock consumer should after you are done
-                        await mutex.ReleaseLease(localToken);
+                        //lock released because of TTL before task completed
+                        postMessage(new ConsoleMessage($"{mutex.Name}: Lock [{lockName}] was lost because of TTL of {this.lockDuration} seconds ==> ERROR", this.color));
                     }
                     else
                     {
-                        Console.WriteLine($"{DateTime.Now}]: {mutex.ownerId}: has no lease on token {localToken}");
-                        break;
-                    }
+                        //release the lease as a good lock consumer should after you are done
+                        postMessage(new ConsoleMessage($"{mutex.Name}: Releasing the lock [{lockName}].", this.color));
+                        await mutex.ReleaseLease(latestFenceToken);
+                    }                        
                 }
+                else
+                {
+                    postMessage(new ConsoleMessage($"{mutex.Name}: Attempt to aquire lease on lock [{lockName}] using token {latestFenceToken}  ==> FAILED",this.color));
+                }
+             
+                //wait for 1 sec before checking again
+                await Task.Delay(1000);
             }
+        }
+
+        private async Task DoWork(string threadName, string lockName)
+        {
+            //wait some random time
+            Random r = new Random();
+            int delay = r.Next(500, 5000);
+            postMessage(new ConsoleMessage($"{threadName}: Will hold lock [{lockName}] for {delay} milliseconds", this.color));
+            await Task.Delay(delay);
         }
     }
 

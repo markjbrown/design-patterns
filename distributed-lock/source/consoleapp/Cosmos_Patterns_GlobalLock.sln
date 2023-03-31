@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.4.33205.214
+VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cosmos_Patterns_GlobalLock", "Cosmos_Patterns_GlobalLock.csproj", "{64AC7A2B-03C7-4C7F-83CF-A8B97EC1F535}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GlobalLock", "GlobalLock.csproj", "{28E13C58-EAD7-47E0-A76A-DB3DFC0B3DE9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{64AC7A2B-03C7-4C7F-83CF-A8B97EC1F535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{64AC7A2B-03C7-4C7F-83CF-A8B97EC1F535}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{64AC7A2B-03C7-4C7F-83CF-A8B97EC1F535}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{64AC7A2B-03C7-4C7F-83CF-A8B97EC1F535}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28E13C58-EAD7-47E0-A76A-DB3DFC0B3DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28E13C58-EAD7-47E0-A76A-DB3DFC0B3DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28E13C58-EAD7-47E0-A76A-DB3DFC0B3DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28E13C58-EAD7-47E0-A76A-DB3DFC0B3DE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5F19B6D1-65B1-4C0A-8031-F48999BD5152}
+		SolutionGuid = {B8C70C75-BEE9-45B2-883D-B903A31A1A24}
 	EndGlobalSection
 EndGlobal
