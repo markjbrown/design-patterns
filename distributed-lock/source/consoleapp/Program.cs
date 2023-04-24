@@ -6,7 +6,7 @@ using System.Net;
 using System.Collections;
 using System.Drawing;
 using System.Diagnostics.Metrics;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow.RecordIO;
+
 
 namespace Cosmos_Patterns_GlobalLock
 {
