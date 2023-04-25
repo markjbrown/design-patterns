@@ -25,7 +25,7 @@
     },
     "containerName": {
       "type": "string",
-      "defaultValue": "CounterContainer",
+      "defaultValue": "Counters",
       "metadata": {
         "description": "The name for the container"
       }
@@ -84,7 +84,7 @@
           "id": "[parameters('containerName')]",
           "partitionKey": {
             "paths": [
-              "/paritionId"
+              "/pk"
             ],
             "kind": "Hash"
           },
