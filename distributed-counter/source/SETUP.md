@@ -30,63 +30,36 @@ Once the template is loaded, populate the values:
   - [Azure CLI](https://learn.microsoft.com/cli/azure/account?view=azure-cli-latest#az-account-list-locations)
   - PowerShell: `Get-AzLocation | Where-Object {$_.Providers -contains "Microsoft.DocumentDB"} | Select location`
 - **Account Name** - Replace `YOUR_SUFFIX` with a suffix to make your Azure Cosmos DB account name unique.
-- **Database Name** - Set to the default **CosmosPatterns**.
-- **Hotel App Container Name** - This is the container partitioned by `/Id`.
+- **Database Name** - Set to the default **CounterDB**.
+- **Container Name** - Set to  default **Counters**, is partitioned by `/pk`.
 - **Throughput** - Set to the default **400**.
 - **Enable Free Tier** - This defaults to `false`. Set it to **true** if you want to use it as [the free tier account](https://learn.microsoft.com/azure/cosmos-db/free-tier).
 
 Once those settings are set, select **Review + create**, then **Create**.
 
-## Set up environment variables
+## Updating Azure Cosmos DB URI and Key in Code
 
 1. Once the template deployment is complete, select **Go to resource group**.
 2. Select the new Azure Cosmos DB for NoSQL account.
-3. From the navigation, under **Settings**, select **Keys**. The values you need for the environment variables for the demo are here.
+3. From the navigation, under **Settings**, select **Keys**. 
 
-Create 2 environment variables to run the demos:
+Update the  following in the **ConsumerApp/appsettings.json** and **Visualizer/appsettings.json** before you run the code:
 
-- `COSMOS_ENDPOINT`: set to the `URI` value on the Azure Cosmos DB account Keys blade.
-- `COSMOS_KEY`: set to the Read-Write `PRIMARY KEY` for the Azure Cosmos DB for NoSQL account
-
-Create your environment variables with the following syntax:
-
-PowerShell:
-
-```powershell
-$env:COSMOS_ENDPOINT="YOUR_COSMOS_ENDPOINT"
-$env:COSMOS_KEY="YOUR_COSMOS_READ_WRITE_PRIMARY_KEY"
-```
-
-Bash:
-
-```bash
-export COSMOS_ENDPOINT="YOUR_COSMOS_ENDPOINT"
-export COSMOS_KEY="YOUR_COSMOS_KEY"
-```
-
-Windows Command:
-
-```text
-set COSMOS_ENDPOINT=YOUR_COSMOS_ENDPOINT
-set COSMOS_KEY=YOUR_COSMOS_KEY
-```
+- `CosmosUri`: Set to the `URI` value on the Azure Cosmos DB account Keys blade.
+- `CosmosKey`: Set to the Read-Write `PRIMARY KEY` for the Azure Cosmos DB for NoSQL account
 
 ## Run the demo
 
-1. From Visual Studio Code, start the app by running the following:
-
-    ```bash
-    dotnet build
-    dotnet run
-    ```
-
-2. In Visual Studio, right-click the `Cosmos_Patterns_DistributedCounter_Web` project and select **Set as Startup project**
-3. Press **F5** to run the web site
-4. From Visual Studio, open the `Cosmos_Patterns_DistributedCounter.csproj` and press **F5** to start the application.
-5. When prompted, enter the requested values such as:
-   1. Product counter name such as `product_1`
-   2. Number of partitions to create for the counter
-   3. How many products to initalize (default 100)
-   4. Enter the number of products you want to `buy`
-   5. The final result will display.
-6. Switch back to the web and refesh the page, you should see your counters displayed with their counts.
+1. In Visual Studio load the **DistributeCounter.sln**
+1. Press **F5** . It will to run 2 projects simultaneously.
+    1. Visualizer web app
+    1. ConsumerApp console application
+1. In the **Visualizer** web app
+    1. Select 'Create Counter' to create the distributed counters.
+    :::image type="content" source="media/createcounter.png" alt-text="Screenshot showing the Create Counter in Visualizer":::
+    1. Copy the Distributed Counter Id  when the counters are ready.
+     :::image type="content" source="media/copycounterid.png" alt-text="Screenshot showing the Counter Id in Visualizer":::
+1. In the **ConsumerApp** console application, paste the value of Distributed Counter Id copied in previous step. Provide the number of  worker threads you want for update the counters.
+:::image type="content" source="media/consoleapp.png" alt-text="Screenshot showing the Console App":::
+1. Switch back to the **Visualizer** web app, you should see your counters values change as they get updated by the worker threads of **ConsumerApp** .
+:::image type="content" source="media/visualizer.png" alt-text="Screenshot showing the Visualizer":::
