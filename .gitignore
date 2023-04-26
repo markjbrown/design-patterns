@@ -349,3 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 /distributed-lock/source/consoleapp/appsettings.development.json
+/distributed-counter/source/Visualizer/appsettings.Development.json
+/distributed-counter/source/ConsumerApp/appsettings.Development.json
