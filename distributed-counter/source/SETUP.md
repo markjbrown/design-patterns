@@ -1,6 +1,6 @@
 # Setup
 
-This template will create an Azure Cosmos DB for NoSQL account with a database named `CosmosPatterns` with a container named `HotelApp`. 
+This template will create an Azure Cosmos DB for NoSQL account with a database named `CounterDB` with a container named `Counters`.
 
 The suggested account name includes 'YOUR_SUFFIX'. Change that to a suffix to make your account name unique.
 
@@ -10,7 +10,7 @@ The Azure Cosmos DB for NoSQL account will automatically be created with the reg
 
 **This link will work if this is a public repo.**
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fsolliancenet%2Fcosmos-db-nosql-modeling%2Fmain%2FCosmos_Patterns_DistributedCounter%2Fsetup%2Fazuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fgithub.com%2FAzureCosmosDB%2Fdesign-patterns%2Ftree%2Fmain%2Fdistributed-counter%2Fsource%2Fazuredeploy.json)
 
 **For the private repo**
 
@@ -41,7 +41,7 @@ Once those settings are set, select **Review + create**, then **Create**.
 
 1. Once the template deployment is complete, select **Go to resource group**.
 2. Select the new Azure Cosmos DB for NoSQL account.
-3. From the navigation, under **Settings**, select **Keys**. 
+3. From the navigation, under **Settings**, select **Keys**.
 
 Update the  following in the **ConsumerApp/appsettings.json** and **Visualizer/appsettings.json** before you run the code:
 
@@ -56,10 +56,10 @@ Update the  following in the **ConsumerApp/appsettings.json** and **Visualizer/a
     1. ConsumerApp console application
 1. In the **Visualizer** web app
     1. Select 'Create Counter' to create the distributed counters.
-    :::image type="content" source="media/createcounter.png" alt-text="Screenshot showing the Create Counter in Visualizer":::
+    ![Screenshot showing the Create Counter in Visualizer](media/createcounter.png)
     1. Copy the Distributed Counter Id  when the counters are ready.
-     :::image type="content" source="media/copycounterid.png" alt-text="Screenshot showing the Counter Id in Visualizer":::
+    ![Screenshot showing the Counter Id in Visualizer](media/copycounterid.png)
 1. In the **ConsumerApp** console application, paste the value of Distributed Counter Id copied in previous step. Provide the number of  worker threads you want for update the counters.
-:::image type="content" source="media/consoleapp.png" alt-text="Screenshot showing the Console App":::
+![Screenshot showing the Console App](media/consoleapp.png)
 1. Switch back to the **Visualizer** web app, you should see your counters values change as they get updated by the worker threads of **ConsumerApp** .
-:::image type="content" source="media/visualizer.png" alt-text="Screenshot showing the Visualizer":::
+![Screenshot showing the Visualizer](media/visualizer.png)

@@ -13,7 +13,7 @@ This sample demonstrates
 
 ## Setup
 
-- Review the [SETUP.md](SETUP.md) file for details on how to setup and run the sample.
+- Review the [SETUP.md](source/SETUP.md) file for details on how to setup and run the sample.
 
 ## Details
 
@@ -22,11 +22,10 @@ The sample has three components
      - **DistributedCounterManagementService**: Used to create Distributed Counter and manage on demand splitting and merging.
      - **DistributedCounterOperationalService**: Used to update the counters in a high traffic workload. The library picks a random distributed counter from thh pool of available counters and updates them using the Patch method of Azure Cosmos DB. This ensures there are no conflicts and each update is an atomic transaction.
  1. **Visualizer**:  This  Blazer app provides a UI to create Distributed Counters. It provides chart based visualization of how the counters are performing. It uses the *DistributedCounterManagementService* class from *Counter* library.
- :::image type="content" source="media/visualizer.png" alt-text="Screenshot showing the Visualizer":::
+![Screenshot showing the Visualizer](media/visualizer.png)
  1. **ConsumerApp**: A Console app used to mimic a high traffic workload. It creates multiple threads and each threads runs in a loop to update the Distributed Counters very fast. It uses the *DistributedCounterOperationalService* class from *Counter* library. 
- :::image type="content" source="media/consumerapp.png" alt-text="Screenshot showing the ConsumerApp":::
-
+![Screenshot showing the ConsumerApp](media/consumerapp.png)
 
 ## Summary
 
-By using distributed counters in Cosmos DB, you can handle high concurency workloads that need item counts that would otherwise be problematic and have less performance.
+By using distributed counters in Cosmos DB, you can handle high concurrency workloads that need item counts that would otherwise be problematic and have less performance.
