@@ -39,7 +39,7 @@ namespace Cosmos_Patterns_GlobalLock
 
     }
 
-    public class Lock
+    public class LockManager : IDisposable
     {
         DistributedLockService dls;
         
@@ -55,7 +55,7 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainerName"></param>
         /// <param name="lockName"></param>
         /// <param name="refreshIntervalS"></param>
-        public Lock( DistributedLockService dls, string lockName, string threadName)
+        public LockManager( DistributedLockService dls, string lockName, string threadName)
         {
             this.dls = dls;
             
@@ -75,9 +75,9 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainer"></param>
         /// <param name="lockName"></param>
         /// <returns></returns>
-        static public async Task<Lock> CreateLock(DistributedLockService dls, string lockName, string threadName)
+        static public async Task<LockManager> CreateLock(DistributedLockService dls, string lockName, string threadName)
         {
-            return new Lock( dls, lockName, threadName);
+            return new LockManager( dls, lockName, threadName);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Cosmos_Patterns_GlobalLock
             try
             {
               
-                return await dls.AcquireLease(lockName, ownerId, leaseDuration,existingFenceToken);
+                return await dls.AcquireLeaseAsync(lockName, ownerId, leaseDuration,existingFenceToken);
             }
             catch (Exception e)
             {
@@ -98,11 +98,11 @@ namespace Cosmos_Patterns_GlobalLock
             }
         }
 
-        public async Task<bool> ReleaseLease(long token)
+        public async Task<bool> ReleaseLease()
         {
             try
             {               
-                await dls.ReleaseLease(ownerId);
+                await dls.ReleaseLeaseAsync(ownerId);
 
                 return true;
             }
@@ -126,7 +126,7 @@ namespace Cosmos_Patterns_GlobalLock
         {
             try
             {
-                return await dls.ValidateLease(lockName, ownerId, token);
+                return await dls.ValidateLeaseAsync(lockName, ownerId, token);
             }
             catch (CosmosException e)
             {
@@ -137,6 +137,23 @@ namespace Cosmos_Patterns_GlobalLock
 
                 throw;
             }
+        }
+
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Task<bool> releaseTask= ReleaseLease();
+            }
+
         }
     }
 
