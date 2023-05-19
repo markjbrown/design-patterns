@@ -47,6 +47,8 @@ namespace Cosmos_Patterns_GlobalLock
         public string ownerId;
         public string Name;
 
+        public string leaseOwnerId;
+
         /// <summary>
         /// This creates a container that has the TTL feature enabled.
         /// </summary>
@@ -88,9 +90,10 @@ namespace Cosmos_Patterns_GlobalLock
         public async Task<LeaseRequestStatus> AcquireLease(int leaseDuration, long existingFenceToken)
         {
             try
-            {
-              
-                return await dls.AcquireLeaseAsync(lockName, ownerId, leaseDuration,existingFenceToken);
+            {                
+                var reqStatus= await dls.AcquireLeaseAsync(lockName, ownerId, leaseDuration,existingFenceToken);
+                leaseOwnerId = reqStatus.currentOwner;
+                return reqStatus;
             }
             catch (Exception e)
             {
@@ -101,8 +104,9 @@ namespace Cosmos_Patterns_GlobalLock
         public async Task<bool> ReleaseLease()
         {
             try
-            {               
-                await dls.ReleaseLeaseAsync(ownerId);
+            {   
+                if(leaseOwnerId== ownerId)
+                    await dls.ReleaseLeaseAsync(ownerId);
 
                 return true;
             }
