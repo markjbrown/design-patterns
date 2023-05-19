@@ -51,9 +51,9 @@ namespace Cosmos_Patterns_GlobalLock
 
             while (this.isActive)
             {                
-                using(var mutex = await LockManager.CreateLock(dls, lockName, threadName))
+                using(var mutex = await LockManager.CreateLockAsync(dls, lockName, threadName))
                 {
-                    var reqStatus = await mutex.AcquireLease(lockDuration, prevFenceToken);
+                    var reqStatus = await mutex.AcquireLeaseAsync(lockDuration, prevFenceToken);
                     var latestFenceToken = reqStatus.fenceToken;
                     var newOwner = reqStatus.currentOwner;
 
@@ -74,19 +74,19 @@ namespace Cosmos_Patterns_GlobalLock
 
 
                         // checking if lease valid when work is completed
-                        if (!await mutex.HasLease(latestFenceToken))
+                        if (!await mutex.HasLeaseAsync(latestFenceToken))
                         {
                             //lock released because of TTL before task completed
                             postMessage(new ConsoleMessage($"{mutex.Name}: Lock [{lockName}] was lost because of TTL of {this.lockDuration} seconds ==> ERROR", this.color));
                         }
-                        // uncomment if  you wan to explicitly want to release the lock.The  locka will get released when code exists using block 
-
-                        //else
-                        //{
-                        //    //release the lease as a good lock consumer should after you are done
-                        //    postMessage(new ConsoleMessage($"{mutex.Name}: Releasing the lock [{lockName}].", this.color));
-                        //    await mutex.ReleaseLease();
-                        //}
+                        // uncomment if  you want to explicitly want to release the lock.The  locka will get released when code exists using block 
+                        /*
+                        else
+                        {
+                            //release the lease as a good lock consumer should after you are done
+                            postMessage(new ConsoleMessage($"{mutex.Name}: Releasing the lock [{lockName}].", this.color));
+                            await mutex.ReleaseLeaseeAsync();
+                        }*/
 
                     }
                     else

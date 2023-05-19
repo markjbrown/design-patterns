@@ -77,7 +77,7 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainer"></param>
         /// <param name="lockName"></param>
         /// <returns></returns>
-        static public async Task<LockManager> CreateLock(DistributedLockService dls, string lockName, string threadName)
+        static public async Task<LockManager> CreateLockAsync(DistributedLockService dls, string lockName, string threadName)
         {
             return new LockManager( dls, lockName, threadName);
         }
@@ -87,7 +87,7 @@ namespace Cosmos_Patterns_GlobalLock
         /// </summary>
         /// <param name="leaseDurationS"></param>
         /// <returns></returns>
-        public async Task<LeaseRequestStatus> AcquireLease(int leaseDuration, long existingFenceToken)
+        public async Task<LeaseRequestStatus> AcquireLeaseAsync(int leaseDuration, long existingFenceToken)
         {
             try
             {                
@@ -101,7 +101,7 @@ namespace Cosmos_Patterns_GlobalLock
             }
         }
 
-        public async Task<bool> ReleaseLease()
+        public async Task<bool> ReleaseLeaseAsync()
         {
             try
             {   
@@ -126,7 +126,7 @@ namespace Cosmos_Patterns_GlobalLock
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> HasLease(long token)
+        public async Task<bool> HasLeaseAsync(long token)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace Cosmos_Patterns_GlobalLock
         {
             if (disposing)
             {
-                Task<bool> releaseTask= ReleaseLease();
+                Task<bool> releaseTask= ReleaseLeaseAsync();
             }
 
         }
