@@ -10,7 +10,7 @@ namespace CosmosDistributedLock.Services
         string currentOwner
       );
 
-    public class DistributedLockService
+    public class DistributedLockService 
     {
 
         private readonly CosmosService cosmos;
@@ -30,7 +30,7 @@ namespace CosmosDistributedLock.Services
             var distributedLock = await cosmos.ReadLockAsync(lockName);
         }
         
-        public async Task<LeaseRequestStatus> AcquireLease(string lockName, string newOwnerId, int leaseDuration, long existingFenceToken)
+        public async Task<LeaseRequestStatus> AcquireLeaseAsync(string lockName, string newOwnerId, int leaseDuration, long existingFenceToken)
         {
 
             DistributedLock distributedLock;
@@ -114,7 +114,7 @@ namespace CosmosDistributedLock.Services
 
         }
 
-        public async Task<bool> ValidateLease(string lockName, string ownerId, long fenceToken)
+        public async Task<bool> ValidateLeaseAsync(string lockName, string ownerId, long fenceToken)
         {
             DistributedLock distributedLock;
 
@@ -151,10 +151,10 @@ namespace CosmosDistributedLock.Services
             return false;
         }
         
-        public async Task ReleaseLease(string ownerId)
-        {
-            await ReleaseLeaseAsync(ownerId);
-        }        
+        //public async Task ReleaseLeaseAsync(string ownerId)
+        //{
+        //    await ReleaseLeaseAsync(ownerId);
+        //}        
 
         private async Task<long> CreateNewLockAsync(string lockName, string ownerId)
         {
@@ -193,7 +193,7 @@ namespace CosmosDistributedLock.Services
             return false;
         }
 
-        private async Task ReleaseLeaseAsync(string ownerId)
+        public async Task ReleaseLeaseAsync(string ownerId)
         {
             await cosmos.DeleteLeaseAsync(ownerId);
         }

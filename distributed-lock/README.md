@@ -9,8 +9,7 @@ Distributed locks are superior to regular locks in distributed systems because t
 ## Details
 
 The application creates a Lock based on the Name and Time to Live( TTL) provided by  the user. The Lock is created in Azure Cosmos DB and  then can be tracked by multiple geographically distributed worker threads. In this sample  the application creates 3  threads  that continuously try to get  the lock.  The worker thread holds the locks for a random number of milliseconds and then releases it. If the lock is not released with the TTL value, the lock gets released automatically.
-
-:::image type="content" source="media/dlock.png" alt-text="Screenshot showing the Distributed Lock  Application running":::
+![Screenshot showing the Distributed Lock  Application running](media/dlock.png)
 
 ### TTL + ETag
 
@@ -27,4 +26,4 @@ The TTL feature is used to automatically get rid of a lease object rather than h
 
 ## Summary
 
-Cosmos DB makes implementing global lock leases a fairly simple by utilizing the `TTL` and 'ETag' features.  But as you have seen from the above samples, it can also be implemeneted using less sophisticated manual techniques.
+Cosmos DB makes implementing global lock leases a fairly simple by utilizing the `TTL` and 'ETag' features.

@@ -39,13 +39,15 @@ namespace Cosmos_Patterns_GlobalLock
 
     }
 
-    public class Lock
+    public class LockManager : IDisposable
     {
         DistributedLockService dls;
         
         string lockName;
         public string ownerId;
         public string Name;
+
+        public string leaseOwnerId;
 
         /// <summary>
         /// This creates a container that has the TTL feature enabled.
@@ -55,7 +57,7 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainerName"></param>
         /// <param name="lockName"></param>
         /// <param name="refreshIntervalS"></param>
-        public Lock( DistributedLockService dls, string lockName, string threadName)
+        public LockManager( DistributedLockService dls, string lockName, string threadName)
         {
             this.dls = dls;
             
@@ -75,9 +77,9 @@ namespace Cosmos_Patterns_GlobalLock
         /// <param name="lockContainer"></param>
         /// <param name="lockName"></param>
         /// <returns></returns>
-        static public async Task<Lock> CreateLock(DistributedLockService dls, string lockName, string threadName)
+        static public async Task<LockManager> CreateLockAsync(DistributedLockService dls, string lockName, string threadName)
         {
-            return new Lock( dls, lockName, threadName);
+            return new LockManager( dls, lockName, threadName);
         }
 
         /// <summary>
@@ -85,12 +87,13 @@ namespace Cosmos_Patterns_GlobalLock
         /// </summary>
         /// <param name="leaseDurationS"></param>
         /// <returns></returns>
-        public async Task<LeaseRequestStatus> AcquireLease(int leaseDuration, long existingFenceToken)
+        public async Task<LeaseRequestStatus> AcquireLeaseAsync(int leaseDuration, long existingFenceToken)
         {
             try
-            {
-              
-                return await dls.AcquireLease(lockName, ownerId, leaseDuration,existingFenceToken);
+            {                
+                var reqStatus= await dls.AcquireLeaseAsync(lockName, ownerId, leaseDuration,existingFenceToken);
+                leaseOwnerId = reqStatus.currentOwner;
+                return reqStatus;
             }
             catch (Exception e)
             {
@@ -98,11 +101,12 @@ namespace Cosmos_Patterns_GlobalLock
             }
         }
 
-        public async Task<bool> ReleaseLease(long token)
+        public async Task<bool> ReleaseLeaseAsync()
         {
             try
-            {               
-                await dls.ReleaseLease(ownerId);
+            {   
+                if(leaseOwnerId== ownerId)
+                    await dls.ReleaseLeaseAsync(ownerId);
 
                 return true;
             }
@@ -122,11 +126,11 @@ namespace Cosmos_Patterns_GlobalLock
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<bool> HasLease(long token)
+        public async Task<bool> HasLeaseAsync(long token)
         {
             try
             {
-                return await dls.ValidateLease(lockName, ownerId, token);
+                return await dls.ValidateLeaseAsync(lockName, ownerId, token);
             }
             catch (CosmosException e)
             {
@@ -137,6 +141,23 @@ namespace Cosmos_Patterns_GlobalLock
 
                 throw;
             }
+        }
+
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Task<bool> releaseTask= ReleaseLeaseAsync();
+            }
+
         }
     }
 
